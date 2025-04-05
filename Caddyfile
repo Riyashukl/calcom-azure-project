@@ -1,0 +1,5 @@
+calcom.centralindia.cloudapp.azure.com {
+  reverse_proxy calcom:3000
+  tls riyavijayshukla@gmail.com  # Your email for Let's Encrypt SSL certs
+}
+

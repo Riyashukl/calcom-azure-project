@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  database:
+    container_name: database
+    image: postgres
+    restart: always
+    volumes:
+      - ./database-data:/var/lib/postgresql/data/
+    env_file: .env
+    networks:
+      - stack
+
+  calcom:
+    image: calcom.docker.scarf.sh/calcom/cal.com
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_WEBAPP_URL: ${NEXT_PUBLIC_WEBAPP_URL}
+        NEXT_PUBLIC_API_V2_URL: ${NEXT_PUBLIC_API_V2_URL}
+        NEXT_PUBLIC_LICENSE_CONSENT: ${NEXT_PUBLIC_LICENSE_CONSENT}
+        CALCOM_TELEMETRY_DISABLED: ${CALCOM_TELEMETRY_DISABLED}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+        CALENDSO_ENCRYPTION_KEY: ${CALENDSO_ENCRYPTION_KEY}
+        DATABASE_URL: ${DATABASE_URL}
+        DATABASE_DIRECT_URL: ${DATABASE_URL}
+    restart: always
+    networks:
+      - stack
+    ports:
+      - "3000:3000" # Keep port 3000 for internal use
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
+      - DATABASE_DIRECT_URL=${DATABASE_URL}
+      - NEXT_PUBLIC_WEBAPP_URL=https://calcom.centralindia.cloudapp.azure.com  # Use HTTPS here
+    depends_on:
+      - database
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"   # HTTP for initial redirect to HTTPS
+      - "443:443" # HTTPS
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - stack
+
+networks:
+  stack:
+    external: false
+
+volumes:
+  caddy_data:
+  caddy_config:
+

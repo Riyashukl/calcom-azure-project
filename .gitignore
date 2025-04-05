@@ -1,0 +1,29 @@
+# Ignore environment variable files (contains secrets)
+.env
+.env.local
+
+# Ignore database volumes (can be regenerated)
+database-data/
+
+# Ignore Docker system files
+**/__pycache__/
+**/*.log
+**/*.pid
+
+# Node modules (if any)
+node_modules/
+
+# Ignore OS and editor specific files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Ignore Caddy data/config (can be rebuilt)
+caddy_data/
+caddy_config/
+
+# Ignore screenshots and Word/doc files if you're uploading separately
+*.docx
+*.png
+
