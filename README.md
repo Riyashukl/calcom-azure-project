@@ -1,3 +1,32 @@
+## 📝 7. Notes About Project Files
+
+👉 Please Read Before Review:
+
+🧾 This README provides only a simple overview. A full detailed documentation is available inside the ZIP file.
+
+🖼️ Due to time and technical constraints, I added only final steps screenshots, not for every individual step.
+
+🎞️ The ZIP file includes an explanation video, complete documentation, and code.
+
+🛡️ For security reasons, I have removed important credentials (e.g. secrets and passwords) from .env and YAML files shared publicly.
+
+📁 You can view all code files (.env, docker-compose.yaml, etc.) inside the submitted ZIP.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 🚀 Cal.com Deployment on Azure
 
 ## 📁 Table of Contents
