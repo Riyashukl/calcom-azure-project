@@ -1,183 +1,218 @@
-# Cal.com Deployment on Azure
+Cal.com on Azure - Deployment Guide
 
-This project deploys Cal.com using Docker Compose on an Azure Linux VM.
+Project by Riya Vijay Shukla
 
-## Services Used
-- Azure VM (Ubuntu)
-- DNS Zone
-- VM Scale Set (VMSS)
-- Caddy (HTTPS via Let's Encrypt)
-- PostgreSQL
-- Alerts (Monitoring)
-- Autoscaling rules
-
-## Usage
-1. Configure `.env`
-2. Run `docker-compose up -d`
-3. Access via `https://your-domain.com`
-
-## Credits
-Project by [Your Name]
-Cal.com Deployment on Azure
-
-Description
+📄 Description
 
 This project demonstrates how to deploy the open-source Cal.com scheduling platform on Microsoft Azure using Docker Compose. It integrates services like Virtual Machines (Linux), DNS Zone, Virtual Machine Scale Sets (VMSS), and monitoring alerts. Caddy is used as a reverse proxy with HTTPS enabled.
 
-Technologies Used
+⚙️ Technologies Used
 
 Microsoft Azure
 
-Linux VM
-
-VM Scale Set (VMSS)
-
-DNS Zone
-
-Monitoring Alerts
+Linux Virtual Machines (Ubuntu 22.04 LTS)
 
 Docker & Docker Compose
 
 PostgreSQL
 
-Caddy Server (for SSL and reverse proxy)
+Cal.com (open-source scheduling)
 
-Cal.com (Open-source scheduling platform)
+Caddy Server (for HTTPS and reverse proxy)
 
-Step-by-Step Deployment Instructions
+Azure DNS Zone
 
-1. Create Linux Virtual Machine (VM)
+Azure Virtual Machine Scale Sets (VMSS)
 
-Go to Azure Portal > Virtual Machines > Create
+Azure Monitor & Alerts
 
-Select Ubuntu 20.04 LTS
+✅ Step-by-Step Deployment Instructions
 
-Choose Standard B2s (2 vCPUs, 4 GiB RAM) or higher
+2.1 Step 1: Create a Linux VM on Azure
 
-Set authentication method to SSH or password
+Go to Azure Portal
 
-Open ports 22 (SSH), 80, and 443
+Navigate to Virtual Machines > Create
 
-2. Connect to VM via SSH
+Choose:
 
-ssh <your-username>@<your-vm-public-ip>
+Resource group: calcom-project
 
-3. Install Docker and Docker Compose
+VM name: calcom-linux-vm
 
-sudo apt update && sudo apt install docker.io docker-compose -y
+Image: Ubuntu 22.04 LTS
 
-4. Clone the Project Repository
+Size: B1s or B1ms (for demo)
 
-git clone https://github.com/your-username/calcom-azure-project.git
-cd calcom-azure-project
+Authentication: Password or SSH
 
-5. Setup Environment Variables
+Ports: Allow 22 (SSH), 80 (HTTP), and 443 (HTTPS)
+
+Click Review + Create and wait for deployment to complete
+
+2.2 Step 2: Connect to VM and Clone Docker Repo
+
+SSH into the VM:
+
+ssh azureuser@<your-vm-ip>
+sudo apt update && sudo apt install git -y
+
+Create a folder and clone repo:
+
+mkdir calcom-docker
+cd calcom-docker
+git clone https://github.com/calcom/docker.git
+
+2.3 Step 3: Setup Environment Variables
+
+Copy and edit the .env file:
 
 cp .env.example .env
-# Fill in values in .env (API keys, secrets, database credentials)
+vi .env
 
-6. Create and Configure Caddyfile
+Generate a secure secret:
 
-Create a file named Caddyfile:
+openssl rand -hex 32
+
+2.4 Step 4: Docker Compose Setup
+
+Install Docker & Docker Compose:
+
+sudo apt install docker.io docker-compose -y
+sudo systemctl enable docker
+sudo systemctl start docker
+
+Verify installation:
+
+docker --version
+docker-compose --version
+
+Edit docker-compose.yaml if needed
+
+2.5 Step 5: Start the Cal.com App
+
+cd docker
+docker-compose up -d
+docker ps
+
+Expected containers:
+
+calcom-web
+
+calcom-db
+
+calcom-caddy
+
+3. Networking & Domain Setup
+
+3.1 Step 6: Configure DNS (Azure DNS Zone)
+
+Go to Azure > DNS Zones
+
+Create a DNS Zone (e.g., calcom.local)
+
+Add an A record:
+
+Name: @
+
+Type: A
+
+IP Address: Your VM's public IP
+
+3.2 Step 7: Configure HTTPS with Caddy
+
+Create Caddyfile in the docker directory:
+
+nano Caddyfile
+
+Add:
 
 calcom.centralindia.cloudapp.azure.com {
-  reverse_proxy calcom:3000
+  reverse_proxy web:3000
 }
 
-7. Launch Cal.com Using Docker Compose
+Ensure ports 80 & 443 are allowed in the VM's networking rules
 
-docker-compose up -d
+4. Cal.com Application Features
 
-This runs PostgreSQL, Cal.com, and Caddy with HTTPS automatically configured.
+Booking and scheduling UI
 
-8. Configure DNS Zone in Azure
+Admin dashboard
 
-Go to Azure Portal > DNS Zones > Create
+Event creation and editing
 
-Name your zone (e.g., cloudapp.azure.com)
+Public event pages
 
-Add an A record pointing your subdomain (e.g., calcom) to the VM’s public IP
+Email confirmations
 
-9. Create Monitoring Alerts
+5. Scaling & Monitoring
 
-Navigate to your VM or VMSS
+5.1 Step 8: Set up Azure VM Scale Set (VMSS)
 
-Go to Monitoring > Alerts > Create Alert Rule
+Go to Azure > Virtual Machine Scale Sets > Create
 
-Example rules:
+Use same region as main VM
 
-CPU > 70% for 10 minutes → Alert or Scale out
+Configure disk, networking, and enable autoscaling:
 
-HTTP 5xx > 10 → Alert
+CPU threshold: > 70% → add instance
 
-10. Set Up VM Scale Set (VMSS)
+Min: 1, Max: 5 instances
 
-Go to Azure Portal > Virtual Machine Scale Sets > Create
+5.2 Step 9: Creating Alerts for Failures
 
-Use Ubuntu and size with 4+ vCPUs
+Use Azure Monitor > Alerts to set up custom rules
 
-In Networking, disable Public IP (load balancer is needed)
+Example:
 
-Enable Autoscaling:
+CPU > 80% for 5 mins → Notify or scale out
 
-Rule 1: CPU > 70% for 10 mins → Increase instance count
+5.3 Step 10: Monitoring (Logs & Cost Alerts)
 
-Rule 2: CPU < 30% for 10 mins → Decrease instance count
+Enable diagnostics, logs, and usage alerts in Azure Monitor
 
-Usage
+Set up cost budget alerts to stay within resource limits
 
-Access your site via https://calcom.centralindia.cloudapp.azure.com
+6. Project Submission
 
-Login via Google or Microsoft account
+6.1 Step 11: Push Project to GitHub
 
-Create meeting types, share booking links, and manage your schedule
+git init
+git remote add origin https://github.com/riyashukl/calcom-azure-project.git
+git add .
+git commit -m "Initial commit with Cal.com setup"
+git push -u origin main
 
-Screenshots to Include (for ZIP submission or GitHub)
+6.2 Step 12: Create ZIP File for Submission
 
-VM Creation (Azure portal)
+cd ~
+zip -r calcom-azure-project.zip calcom-azure-project
+mv calcom-azure-project.zip /home/azureuser/
+scp azureuser@<vm-ip>:/home/azureuser/calcom-azure-project.zip .
 
-SSH into VM
+6.3 Step 13: Record and Submit Demo Video
 
-Docker Compose up command
+Include:
 
-DNS Zone and A Record
+VM setup & Docker containers
 
-Caddy HTTPS/SSL working
+Access via HTTPS
 
-Cal.com UI loaded in browser
+GitHub and DNS Zone
 
-Alert Rule configuration
+Tools: OBS Studio, Xbox Game Bar, Zoom
 
-VMSS scaling rules setup
+Upload to YouTube or Drive
 
-Troubleshooting
+📽️ Demo Video Link: [Insert your video URL here]
 
-SSL not working? Check:
+7. References & Useful Links
 
-Caddy logs (docker logs caddy)
+Azure Portal
 
-DNS propagation
+Cal.com GitHub
 
-Ports 80 and 443 are open
+Docker Documentation
 
-App not loading? Ensure:
-
-Database container is running
-
-All environment variables are set correctly
-
-VMSS not scaling?
-
-Check metrics and autoscale rules
-
-Verify monitoring data and alert configuration
-
-License
-
-This project uses Cal.com under its open-source license. See LICENSE for terms.
-
-Author
-
-Riya Shukla (riyashukla0301@gmail.com)
-
+Caddy Server
 
